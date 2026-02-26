@@ -1100,4 +1100,228 @@ Foundation	categorical	one-hot
 
 
 
-updated
+🔥 1. BsmtQual
+🧠 Meaning
+
+Quality of basement (height + overall finish)
+
+📊 Values
+
+Ex = Excellent
+
+Gd = Good
+
+TA = Typical
+
+Fa = Fair
+
+Po = Poor
+
+NaN = No basement
+
+⚠️ Key Insight
+
+👉 NaN ≠ missing
+👉 It means no basement exists
+
+✅ Approach
+
+Ordinal encoding (because order exists)
+
+Fill NaN with 0 (represents no basement)
+
+mapping = {"Po":1, "Fa":2, "TA":3, "Gd":4, "Ex":5}
+df["BsmtQual"] = df["BsmtQual"].map(mapping).fillna(0)
+🧠 Why
+
+Preserves ranking
+
+Keeps “no basement” as lowest value
+
+🔥 2. BsmtCond
+🧠 Meaning
+
+Condition of basement
+
+📊 Values
+
+Same as above
+
+⚠️ Insight
+
+👉 Less important than BsmtQual
+
+✅ Approach
+df["BsmtCond"] = df["BsmtCond"].map(mapping).fillna(0)
+🧠 Why
+
+Still ordinal
+
+Adds supporting signal
+
+🔥 3. BsmtExposure
+🧠 Meaning
+
+Exposure to outside (light/windows)
+
+📊 Values
+
+Gd > Av > Mn > No
+
+NaN = No basement
+
+✅ Approach
+mapping = {"No":1, "Mn":2, "Av":3, "Gd":4}
+df["BsmtExposure"] = df["BsmtExposure"].map(mapping).fillna(0)
+🧠 Why
+
+Exposure impacts price
+
+More light = higher value
+
+🔥 4. BsmtFinType1
+🧠 Meaning
+
+Type of main finished basement area
+
+📊 Values
+
+GLQ (best)
+
+ALQ
+
+BLQ
+
+Rec
+
+LwQ
+
+Unf (worst)
+
+NaN = no basement
+
+⚠️ Insight
+
+👉 Semi-ordinal (not perfect but usable)
+
+✅ Approach
+mapping = {
+    "Unf":1, "LwQ":2, "Rec":3,
+    "BLQ":4, "ALQ":5, "GLQ":6
+}
+df["BsmtFinType1"] = df["BsmtFinType1"].map(mapping).fillna(0)
+🧠 Why
+
+Preserves usable space hierarchy
+
+Better than one-hot
+
+🔥 5. BsmtFinSF1
+🧠 Meaning
+
+Area of main finished basement
+
+⚠️ Insight
+
+👉 Right-skewed distribution
+
+✅ Approach
+df["BsmtFinSF1_log"] = np.log1p(df["BsmtFinSF1"])
+🧠 Why
+
+Reduces skew
+
+Stabilizes variance
+
+Helps models learn better
+
+🔥 6. BsmtFinType2
+🧠 Meaning
+
+Type of second finished basement area
+
+⚠️ Insight
+
+👉 Less important
+👉 Often Unf or NaN
+
+✅ Approach
+
+Same as Type1
+
+df["BsmtFinType2"] = df["BsmtFinType2"].map(mapping).fillna(0)
+🧠 Why
+
+Keep consistency
+
+Still ordinal
+
+🔥 7. BsmtFinSF2
+🧠 Meaning
+
+Area of second finished basement
+
+⚠️ Insight
+
+👉 Mostly zeros (sparse feature)
+
+✅ Approach
+df["BsmtFinSF2_log"] = np.log1p(df["BsmtFinSF2"])
+df["HasBsmtFinSF2"] = (df["BsmtFinSF2"] > 0).astype(int)
+🧠 Why
+
+Log → handles skew
+
+Binary → captures presence (more useful)
+
+🔥 8. BsmtUnfSF
+🧠 Meaning
+
+Unfinished basement area
+
+⚠️ Insight
+
+👉 Alone not very useful
+
+✅ Approach
+df["BsmtUnfSF_log"] = np.log1p(df["BsmtUnfSF"])
+🧠 Why
+
+Handles skew
+
+Keeps numerical info
+
+🔥 9. TotalBsmtSF
+🧠 Meaning
+
+Total basement area
+
+⚠️ Insight
+
+👉 Strong feature
+👉 Highly correlated with others
+
+✅ Approach
+df["TotalBsmtSF_log"] = np.log1p(df["TotalBsmtSF"])
+🧠 Why
+
+Strong predictor
+
+Log improves learning
+
+🔥 10. Heating
+🧠 Meaning
+
+Type of heating system
+
+📊 Values
+
+Mostly:
+
+GasA (dominant)
+⚠️ Insight
+
+👉 Low variance feature
+
+✅ Approach
+df["Heating"] = (df["Heating"] == "GasA").astype(int)
